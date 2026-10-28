@@ -1,0 +1,46 @@
+rules_version = '2';
+// Paste this into Firebase console → Firestore Database → Rules, then Publish.
+// Who gets in is decided by the members collection (doc id = lowercase Google email),
+// so no email addresses need to live in this repository.
+//
+// Roles:
+//   admin      manages the team list, can edit or delete any intake
+//   pm         reviews intakes: edits any intake and changes its status
+//   submitter  submits intakes and edits their own while they're still "New"
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function email() { return request.auth.token.email.lower(); }
+    function memberPath() { return /databases/$(database)/documents/members/$(email()); }
+    function isMember() { return signedIn() && exists(memberPath()); }
+    function role() { return get(memberPath()).data.role; }
+    function isAdmin() { return isMember() && role() == 'admin'; }
+    function isReviewer() { return isMember() && role() in ['admin', 'pm']; }
+
+    // The team list. Members can see it; only admins can change it.
+    match /members/{memberEmail} {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
+    // Project intakes. Every member can read them.
+    match /intakes/{intakeId} {
+      allow read: if isMember();
+      allow create: if isMember()
+        && request.resource.data.submittedBy == email()
+        && request.resource.data.status == 'New';
+      allow update: if isReviewer()
+        || (isMember()
+            && resource.data.submittedBy == email()
+            && resource.data.status == 'New'
+            && request.resource.data.submittedBy == email()
+            && request.resource.data.status == 'New');
+      allow delete: if isAdmin();
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
