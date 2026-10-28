@@ -18,16 +18,20 @@ function init() {
 }
 
 /* ---------- auth ---------- */
-// cb({ user, email, member }) — member is null when signed in but not on the team list; user is null when signed out.
+// cb({ user, email, member, lookupError }) — member is null when signed in but not on the team list; user is null when signed out.
+// lookupError is set when the team-list check itself failed (offline, blocked, misconfigured), as opposed to "not on the list".
 export function watchSession(cb) {
   init();
   return onAuthStateChanged(auth, async user => {
-    if (!user) return cb({ user: null, email: null, member: null });
+    if (!user) return cb({ user: null, email: null, member: null, lookupError: null });
     const email = (user.email || "").toLowerCase();
-    let member = null;
+    let member = null, lookupError = null;
     try { const snap = await getDoc(doc(db, "members", email)); if (snap.exists()) member = snap.data(); }
-    catch (e) { /* not a member: rules deny the read */ }
-    cb({ user, email, member });
+    catch (e) {
+      // Not on the list: the rules deny the read. Anything else is a real failure worth showing.
+      if (!/permission-denied/i.test(String(e && (e.code || e.message)))) { lookupError = e; console.error("Team list lookup failed", e); }
+    }
+    cb({ user, email, member, lookupError });
   });
 }
 export async function signIn() { init(); await signInWithPopup(auth, new GoogleAuthProvider()); }
@@ -76,6 +80,7 @@ export function friendlyError(e) {
   if (/popup-closed|cancelled-popup/i.test(m)) return "Sign-in was closed before it finished.";
   if (/unauthorized-domain/i.test(m)) return "This site's address isn't on Firebase's authorized domains list yet (see SETUP.md, step 4).";
   if (/popup-blocked/i.test(m)) return "Your browser blocked the sign-in popup. Allow popups for this site and try again.";
-  if (/unavailable|network/i.test(m)) return "Couldn't reach the database. Check your connection and try again.";
+  if (/offline|unavailable|network/i.test(m)) return "Couldn't reach the database. A browser extension (ad or tracker blocker) may be blocking firestore.googleapis.com, or the connection dropped. Try another browser or disable the blocker for this site.";
+  if (/failed-precondition|not-found|NOT_FOUND/i.test(m)) return "The Firestore database wasn't found. Check that it exists and is named (default).";
   return m;
 }

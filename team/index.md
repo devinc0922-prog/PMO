@@ -49,7 +49,7 @@ let me = null, stop = null;
 if (!isConfigured) {
   $("gate").innerHTML = `<p>Firebase isn't connected yet, so the team list can't load. Follow SETUP.md in the repository.</p>`;
 } else {
-  watchSession(({ user, email, member }) => {
+  watchSession(({ user, email, member, lookupError }) => {
     if (stop) { stop(); stop = null; }
     $("signOutBtn").hidden = !user;
     $("who").textContent = user ? "Signed in as " + (member && member.name ? member.name : email) : "";
@@ -57,6 +57,10 @@ if (!isConfigured) {
     if (!user) {
       $("gate").innerHTML = `<p>Sign in with the Google account an admin added for you.</p><p><button type="button" class="primary" id="go">Sign in with Google</button></p><p class="err" id="err"></p>`;
       $("go").onclick = () => signIn().catch(e => $("err").textContent = friendlyError(e));
+      return;
+    }
+    if (lookupError) {
+      $("gate").innerHTML = `<p>You're signed in as <b>${esc(email)}</b>, but checking the team list failed: ${esc(friendlyError(lookupError))}</p><p class="note mono">${esc(lookupError.code || lookupError.message || lookupError)}</p>`;
       return;
     }
     if (!member) {

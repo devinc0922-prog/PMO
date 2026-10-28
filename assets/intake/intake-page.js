@@ -250,7 +250,7 @@ if (DEMO) {
   friendly = fb.friendlyError;
   store = { watch: fb.watchIntakes, create: fb.createIntake, save: fb.saveIntake, setStatus: fb.setIntakeStatus, remove: fb.deleteIntake };
   $("#signOutBtn").onclick = () => fb.signOut();
-  fb.watchSession(({ user, email, member }) => {
+  fb.watchSession(({ user, email, member, lookupError }) => {
     if (stopWatch) { stopWatch(); stopWatch = null; }
     $("#signOutBtn").hidden = !user;
     $("#who").textContent = user ? (member?.name || email) : "";
@@ -259,7 +259,8 @@ if (DEMO) {
       $("#go").onclick = () => fb.signIn().catch(e => $("#err").textContent = friendly(e));
       return;
     }
-    if (!member) return gate(`<h2>Not on the team list yet</h2><p>You're signed in as <b>${esc(email)}</b>. Ask an admin to add this account on the Team page, then reload.</p>`);
+    if (lookupError) return gate(`<h2>Couldn't check the team list</h2><p>You're signed in as <b>${esc(email)}</b>, but the lookup failed: ${esc(friendly(lookupError))}</p><p class="note mono">${esc(lookupError.code || lookupError.message || lookupError)}</p>`);
+    if (!member) return gate(`<h2>Not on the team list yet</h2><p>You're signed in as <b>${esc(email)}</b>. Ask an admin to add this account on the Team page, then reload.</p><p class="note">Already on the list? Then the database refused the lookup: the security rules may not be deployed. An admin can re-run <b>Actions → Deploy Firestore rules</b> in the GitHub repository.</p>`);
     me = { email, name: member.name || email, role: member.role };
     start();
   });
