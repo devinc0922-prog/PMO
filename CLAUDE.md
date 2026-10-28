@@ -1,5 +1,7 @@
 # Notes for Claude
 
+**Read [`docs/SYSTEM.md`](docs/SYSTEM.md) first.** It's the shared map of the whole PMO system (site, Firebase, skills, estimating library, ConnectWise), the per-project workflow, open items and decisions. Update it before you finish if you change anything.
+
 This repo is the Professional Services PMO site, served by GitHub Pages (Jekyll) at https://devinc0922-prog.github.io/PMO/. Data lives in Firebase (Firestore), behind Google sign-in and a team allowlist.
 
 ## Hard rule: nothing confidential goes in this repo

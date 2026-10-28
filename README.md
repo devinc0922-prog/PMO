@@ -23,6 +23,7 @@ Keep pricing, rates and client details out of the repository: the published page
 
 | Path | What it's for |
 |---|---|
+| [docs/SYSTEM.md](docs/SYSTEM.md) | Start here: how the whole PMO system fits together, open items, decisions |
 | [SETUP.md](SETUP.md) | One-time GitHub Pages and Firebase setup |
 | `assets/intake/intake-model.js` | The intake form definition: project types, fields, estimate drivers, statuses |
 | `assets/intake/intake-page.js` | Intake page behaviour |

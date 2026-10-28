@@ -12,6 +12,7 @@ exclude:
   - README.md
   - SETUP.md
   - CLAUDE.md
+  - docs
   - firestore.rules
   - firebase.json
   - tests
