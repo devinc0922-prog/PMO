@@ -33,7 +33,8 @@ export const CORE_TOP = [
     { id: "deadlineDriver", label: "What drives the deadline", full: 1, ph: "Contract award, lease end, deal close, hardware EOL…" },
     { id: "billing", label: "Billing model", type: "select", req: 1, drv: 1, opts: ["Fixed fee", "Time & materials", "Fixed fee + T&M change orders", "Prepaid block hours", "Not decided"] },
     { id: "budget", label: "Client budget range", type: "select", opts: ["Under $5k", "$5k–$15k", "$15k–$40k", "$40k–$100k", "Over $100k", "Unknown"] },
-    { id: "priority", label: "Priority", type: "select", opts: ["Standard", "High", "Urgent – contractual or regulatory date"] }
+    { id: "priority", label: "Priority", type: "select", opts: ["Standard", "High", "Urgent – contractual or regulatory date"] },
+    { id: "onsiteVisits", label: "On-site visits expected", type: "number", hint: "Trips to client sites. Enter 0 if remote only" }
   ]}
 ];
 
@@ -56,7 +57,15 @@ export const TYPE_FIELDS = {
     { id: "day1", label: "Day 1 must-haves", type: "textarea", full: 1, hint: "What has to work on close day: email, payroll, shared drives, building access" },
     { id: "lobApps", label: "Line-of-business apps", type: "textarea", full: 1 },
     { id: "secAlign", label: "Security stack to bring in line", type: "checks", full: 1, opts: ["EDR", "MFA / Conditional Access", "Email security", "Backup", "RMM agent", "Security awareness training"] },
-    { id: "acqCompliance", label: "Compliance obligations", type: "checks", full: 1, opts: ["CMMC / DFARS", "HIPAA", "SOC 2", "PCI", "None known"] }
+    { id: "acqCompliance", label: "Compliance obligations", type: "checks", full: 1, opts: ["CMMC / DFARS", "HIPAA", "SOC 2", "PCI", "None known"] },
+    { id: "acqServers", label: "Servers to onboard or retire", type: "number", drv: 1, hint: "Physical + virtual. Enter 0 if none" },
+    { id: "acqAppCount", label: "Line-of-business / SaaS apps (count)", type: "number", hint: "Apps needing SSO, re-licensing or migration" },
+    { id: "acqVendors", label: "Vendor contracts to transition (count)", type: "number", hint: "ISP, phones, licensing, outgoing MSP, etc." },
+    { id: "acqMailMove", label: "Mail / file migration in scope", type: "select", drv: 1, opts: YN, hint: "If Yes, fill the four fields below; they're estimated with the M365 migration library" },
+    { id: "acqMailboxes", label: "Mailboxes to migrate", type: "number" },
+    { id: "acqSharedMbx", label: "Shared / resource mailboxes to migrate", type: "number" },
+    { id: "acqDomains", label: "Email domains moving", type: "number" },
+    { id: "acqFileGB", label: "File data to migrate (GB)", type: "number" }
   ],
   m365: [
     { id: "source", label: "Source platform", type: "select", req: 1, drv: 1, opts: ["Google Workspace", "Exchange on-prem", "Another Microsoft 365 tenant", "IMAP / hosted email", "Other"] },
@@ -73,7 +82,11 @@ export const TYPE_FIELDS = {
     { id: "devices", label: "Devices to reconfigure", type: "number", drv: 1 },
     { id: "tool", label: "Migration tool", type: "select", opts: ["BitTitan MigrationWiz", "Movebot", "ShareGate", "Native / cross-tenant", "Not decided"] },
     { id: "afterHours", label: "After-hours cutover required", type: "select", opts: YN },
-    { id: "security", label: "Security baseline in scope", type: "checks", full: 1, opts: ["MFA", "Conditional Access", "Intune enrollment", "Defender for Business", "Purview / DLP", "Third-party email security"] }
+    { id: "security", label: "Security baseline in scope", type: "checks", full: 1, opts: ["MFA", "Conditional Access", "Intune enrollment", "Defender for Business", "Purview / DLP", "Third-party email security"] },
+    { id: "spSites", label: "SharePoint sites / shared drives (count)", type: "number", hint: "Target sites, or source shared drives. Enter 0 if none" },
+    { id: "teamsCount", label: "Teams to migrate or recreate (count)", type: "number", hint: "Enter 0 for Google sources" },
+    { id: "mailApps", label: "Mail-integrated apps / relays (count)", type: "number", hint: "Scanners, SMTP relays, LOB apps that send mail" },
+    { id: "deviceOwnership", label: "Device ownership", type: "select", opts: ["Company-owned", "BYOD", "Mixed", "Unknown"] }
   ],
   cmmc: [
     { id: "roleAttest", label: "Confirmed: we are the implementer for this client and will not perform their C3PAO assessment.", type: "attest", req: 1, full: 1 },
@@ -90,10 +103,19 @@ export const TYPE_FIELDS = {
     { id: "docOwner", label: "Who writes the documentation", type: "select", drv: 1, opts: ["Us", "Client", "Shared"] },
     { id: "docs", label: "Documentation that exists today", type: "checks", full: 1, opts: ["SSP", "POA&M", "Policies & procedures", "Network diagram", "CUI data flow diagram", "Asset inventory", "None"] },
     { id: "esps", label: "External service providers / cloud services touching CUI", type: "textarea", full: 1 },
-    { id: "ongoing", label: "Ongoing managed compliance after go-live", type: "select", opts: YN }
+    { id: "ongoing", label: "Ongoing managed compliance after go-live", type: "select", opts: YN, hint: "Sold as a separate managed service, not project scope" },
+    { id: "enclaveType", label: "Enclave type", type: "select", opts: ["GCC High + Intune-managed devices", "Cloud desktop (AVD / Windows 365)", "On-prem enclave", "Hybrid", "Not decided"], hint: "Only if the scoping approach is Enclave" },
+    { id: "cmmcEndpoints", label: "In-scope endpoints", type: "number", drv: 1, hint: "Workstations / laptops that touch CUI or protect it" },
+    { id: "cmmcServers", label: "In-scope servers / VMs", type: "number", drv: 1, hint: "Enter 0 if none" },
+    { id: "cmmcNetDev", label: "In-scope network devices", type: "number", hint: "Firewalls, switches, wireless controllers" },
+    { id: "cmmcSystems", label: "In-scope systems / apps (count)", type: "number", hint: "Cloud services, LOB apps, SaaS touching CUI" },
+    { id: "espCount", label: "External service providers (count)", type: "number", hint: "Each needs a responsibility matrix" },
+    { id: "notMet", label: "NOT MET practices", type: "number", hint: "From a gap assessment. Leave blank if none has been done" },
+    { id: "enclaveDevices", label: "Enclave devices", type: "number", hint: "Devices that will access the enclave (enclave only)" },
+    { id: "enclaveServers", label: "Enclave servers", type: "number", hint: "Servers built inside an on-prem enclave (on-prem enclave only)" }
   ],
   infra: [
-    { id: "infraScope", label: "What's in scope", type: "checks", req: 1, drv: 1, full: 1, opts: ["Servers / hosts", "Hypervisor & VMs", "Storage (SAN / NAS)", "Switching", "Firewall", "Wireless", "Backup / DR", "UPS / power", "Server OS upgrades"] },
+    { id: "infraScope", label: "What's in scope", type: "checks", req: 1, drv: 1, full: 1, opts: ["Servers / hosts", "Hypervisor & VMs", "Storage (SAN / NAS)", "Switching", "Firewall", "Wireless", "Backup / DR", "UPS / power", "Server OS upgrades", "AD / domain"] },
     { id: "hvCurrent", label: "Current hypervisor", type: "select", opts: ["Hyper-V", "VMware", "None (physical)", "Other"] },
     { id: "hvTarget", label: "Target platform", type: "select", drv: 1, opts: ["Hyper-V", "VMware", "Proxmox", "Azure / cloud", "Hybrid", "Not decided"] },
     { id: "hostsCurrent", label: "Physical hosts today", type: "number" },
@@ -108,7 +130,17 @@ export const TYPE_FIELDS = {
     { id: "downtime", label: "Downtime tolerance", type: "select", opts: ["Hours acceptable", "Under 1 hour", "Near-zero (parallel build)"] },
     { id: "backupSol", label: "Backup solution" },
     { id: "osEol", label: "End-of-life OS present", type: "checks", full: 1, opts: ["Server 2012 / R2", "Server 2016", "Server 2019", "None"] },
-    { id: "appsOnHosts", label: "Critical apps on these systems", type: "textarea", full: 1, hint: "SQL, ERP, file shares, line-of-business" }
+    { id: "appsOnHosts", label: "Critical apps on these systems", type: "textarea", full: 1, hint: "SQL, ERP, file shares, line-of-business" },
+    { id: "osUpgrades", label: "Servers needing OS upgrade or rebuild", type: "number", hint: "Enter 0 if none" },
+    { id: "vendorApps", label: "Apps needing vendor reinstall / support (count)", type: "number" },
+    { id: "firewalls", label: "Firewalls", type: "number", hint: "If Firewall is in scope" },
+    { id: "switches", label: "Switches", type: "number", hint: "If Switching is in scope" },
+    { id: "accessPoints", label: "Wireless access points", type: "number", hint: "If Wireless is in scope" },
+    { id: "vlans", label: "VLANs / subnets", type: "number", hint: "If Switching or Firewall is in scope" },
+    { id: "newDCs", label: "New domain controllers", type: "number", hint: "If AD / domain is in scope" },
+    { id: "adUsers", label: "AD user accounts", type: "number", hint: "If AD / domain is in scope (for cleanup effort)" },
+    { id: "backupSystems", label: "Systems to protect with backup", type: "number", hint: "If Backup / DR is in scope" },
+    { id: "dataMoveTB", label: "Data to migrate to new storage (TB)", type: "number", hint: "Data that moves, not total capacity" }
   ]
 };
 
@@ -181,6 +213,6 @@ export function summary(doc) {
 
 export const EXAMPLE = {
   type: "m365",
-  core: { client: "Example: Hartwell Precision", projectName: "Example – Google Workspace to M365 migration", relationship: "Managed services (TeamLogic IT)", source: "Sales / account manager", contactName: "Dana Ruiz (COO)", contactEmail: "dana@example.com", techContact: "Office manager", cwOpp: "OPP-0000", targetStart: "", hardDeadline: "", deadlineDriver: "Google Workspace renewal at end of quarter", billing: "Fixed fee", budget: "$15k–$40k", priority: "High", objective: "Consolidate on Microsoft 365 ahead of Workspace renewal and bring devices under Intune.", success: "All mail, calendars and Drive data moved with no lost mail; users on Outlook and OneDrive by Monday after cutover.", inScope: "Mailboxes, shared drives, MFA, Intune enrollment", outScope: "Third-party app SSO, phone system", risks: "Large shared drives with deep folder nesting; renewal date is fixed.", deps: ["Admin credentials / GDAP", "Licensing purchase"], links: "", proposedPM: "", resources: ["Project manager", "Senior engineer", "UK engineer (off-hours)"], notes: "Example data – clear before submitting a real intake." },
-  details: { source: "Google Workspace", mailboxes: "42", sharedMbx: "6", mailData: "380", fileSource: ["Google Drive"], fileData: "900", teams: "Yes", license: "Business Premium", cutover: "Single cutover (weekend)", domains: "2", dnsOwner: "Us", devices: "45", tool: "BitTitan MigrationWiz", afterHours: "Yes", security: ["MFA", "Conditional Access", "Intune enrollment"] }
+  core: { client: "Example: Hartwell Precision", projectName: "Example – Google Workspace to M365 migration", relationship: "Managed services (TeamLogic IT)", source: "Sales / account manager", contactName: "Dana Ruiz (COO)", contactEmail: "dana@example.com", techContact: "Office manager", cwOpp: "OPP-0000", targetStart: "", hardDeadline: "", deadlineDriver: "Google Workspace renewal at end of quarter", billing: "Fixed fee", budget: "$15k–$40k", priority: "High", onsiteVisits: "0", objective: "Consolidate on Microsoft 365 ahead of Workspace renewal and bring devices under Intune.", success: "All mail, calendars and Drive data moved with no lost mail; users on Outlook and OneDrive by Monday after cutover.", inScope: "Mailboxes, shared drives, MFA, Intune enrollment", outScope: "Third-party app SSO, phone system", risks: "Large shared drives with deep folder nesting; renewal date is fixed.", deps: ["Admin credentials / GDAP", "Licensing purchase"], links: "", proposedPM: "", resources: ["Project manager", "Senior engineer", "UK engineer (off-hours)"], notes: "Example data – clear before submitting a real intake." },
+  details: { source: "Google Workspace", mailboxes: "42", sharedMbx: "6", mailData: "380", fileSource: ["Google Drive"], fileData: "900", teams: "Yes", license: "Business Premium", cutover: "Single cutover (weekend)", domains: "2", dnsOwner: "Us", devices: "45", tool: "BitTitan MigrationWiz", afterHours: "Yes", security: ["MFA", "Conditional Access", "Intune enrollment"], spSites: "4", teamsCount: "0", mailApps: "2", deviceOwnership: "Company-owned" }
 };

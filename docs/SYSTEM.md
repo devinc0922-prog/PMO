@@ -32,10 +32,11 @@ The build work (site, library, skills, export) happens **once**. After that, eac
 | Intake form + queue + team access | PMO site: https://devinc0922-prog.github.io/PMO/ (this repo) | **Live** |
 | Data store + sign-in | Firebase project `project-management-offic-a2dfb` (Firestore + Google sign-in) | **Live** |
 | Security rules deploy | GitHub Action on push to `main` (`.github/workflows/deploy-firestore-rules.yml`) | **Live** |
-| Rate card | Claude project files only (confidential) | Check it's uploaded |
-| Estimating library (phases, tasks, hour ranges, drivers per type) | Claude project files only (confidential rates; hour formulas could live here later) | Built in a chat. **Confirm it's saved as a project file** |
+| Rate card (bill rates, cost rates, pricing rules) | Claude project file `estimating/rate_card.md` only (confidential) | **Done** |
+| Estimating library (4 types: phases, tasks, owner role, low/expected/high hours, intake drivers, scope modules) | Claude project file `estimating/ps_estimating_library.md`; full calculator workbook kept by Devin (binary files can't be project files) | **Done** |
+| Pipeline reference (driver mapping for all 4 types, estimate math, output formats) | Claude project file `pmo/pipeline_reference.md` | **Done**, keep current |
 | Skill: intake → charter | Claude skill `pmo-intake-to-charter` | Built |
-| Skill: charter → WBS + estimate | Claude skill `pmo-charter-to-estimate` | Built |
+| Skill: charter → WBS + estimate | Claude skill `pmo-charter-to-estimate` | Built (defers to the pipeline reference where they differ) |
 | ConnectWise export | Devin's ConnectWise REST script + the estimate sheet's import columns | In progress |
 
 ### Per project (the routine)
@@ -43,7 +44,7 @@ The build work (site, library, skills, export) happens **once**. After that, eac
 1. **Intake:** sales/AM submits on the PMO site. It appears in the queue with a review due date (two business days, per the intake/dispatch SOP).
 2. **One new chat** in the dedicated Claude project. Paste the intake's **Copy summary** from the queue.
 3. **Charter:** `pmo-intake-to-charter` produces the charter/SOW doc. Fields marked `(missing)` become open questions, never assumptions.
-4. **Plan + estimate:** `pmo-charter-to-estimate` produces the WBS and estimate sheet (hours by phase and role, contingency, price, margin, billing model explicit).
+4. **Plan + estimate:** `pmo-charter-to-estimate` produces the WBS and estimate sheet (hours by phase and role, contingency, fixed-fee price, margin and fixed-fee exposure, billing model explicit).
 5. **Review**, resolve open questions with the client, then **export to ConnectWise**.
 6. **Close the loop on the site:** set the intake's status (Charter drafted → Won – in delivery / Declined).
 
@@ -53,7 +54,7 @@ The build work (site, library, skills, export) happens **once**. After that, eac
 |---|---|---|
 | This repo (public) | Page code, form definition, blank templates, SOPs, this file | Client names/details, rates, pricing, margins, anything from a client environment |
 | Firestore | Submitted intakes, team list | — (behind sign-in + rules) |
-| Claude project files | Rate card, estimating library, SOPs, templates, a copy of this file | — |
+| Claude project files | Rate card, estimating library, pipeline reference, SOPs, templates, a copy of this file | — |
 | Claude chats | Per-project work (charter, plan, estimate) | Anything other chats need later. Put that in this file or a project file |
 | ConnectWise | The delivered project, phases, tickets | — |
 
@@ -74,12 +75,12 @@ The build work (site, library, skills, export) happens **once**. After that, eac
 
 Keep this list current. Remove items when done; add new ones with the date.
 
-- [ ] **Intake form revision** to match the estimating library's drivers. A chat worked on it, but nothing was pushed to the repo as of 2026-10-28. Re-do in a chat with the repo attached, or paste that chat's result into one.
 - [ ] **Charter / estimate links on the queue**, so the site shows where each engagement's documents live (one place to see everything).
-- [ ] **Confirm the estimating library and rate card are saved as project files**, not only inside a chat.
 - [ ] **ConnectWise export:** finalize the sheet's import columns against the REST script.
 - [ ] **Estimate calculator page** on the site (hour formulas only, never rates).
 - [ ] **Microsoft 365 sign-in** when the team starts using the site.
+- [ ] **First real intake run** end to end with the finished library and pricing rules (2026-10-28).
+- [ ] **Calibrate the library** once 3–5 projects per type have closed (ConnectWise actuals vs estimate; time logged against the library's phase names) (2026-10-28).
 - [ ] Delete the unused claude.ai intake artifact from the old Pro Services project.
 
 ## 6. Decisions log
@@ -91,6 +92,11 @@ Newest at the bottom. One line each: date, decision, why.
 - 2026-10-28: Separate Firebase project under Devin's work Google account, which is also the first admin.
 - 2026-10-28: Rules deploy from GitHub Actions with a rules-only service account; Claude never holds Firebase credentials and can't read intake data.
 - 2026-10-28: Build work happens in a dedicated Claude project; this file is the shared context between its chats.
+- 2026-10-28: Estimating library built for all four types; project types can combine in one estimate (e.g. acquisition + M365) so a Venture deal is one estimate and one CW project.
+- 2026-10-28: Estimating method: PM/PC effort as a % of engineering hours (PMI benchmark) and contingency from three-point (PERT) estimates at 80% confidence (AACE 18R-97); no flat percentages.
+- 2026-10-28: All projects are priced as a flat fixed fee from initial scoping. Pricing rules (PM fee, cost rates, margin target) live only in the project's rate card.
+- 2026-10-28: Library and rate card are stored as project text files; the calculator .xlsx stays outside the project because project files can't hold binaries.
+- 2026-10-28: Intake form revised to capture the estimating library's drivers (count fields per type, on-site visits, enclave type, "AD / domain" scope, mail/file migration on acquisitions). Additive only: no field ids renamed or removed, so existing intakes still load. The field-to-driver mapping lives in project file `pmo/pipeline_reference.md`.
 
 ## 7. Keeping this file current
 
