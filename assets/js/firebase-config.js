@@ -1,13 +1,21 @@
-// Firebase web app settings.
-// Get these from the Firebase console: Project settings → General → Your apps → (web app) → SDK setup and configuration → Config.
-// These values are not secrets. Access is controlled by firestore.rules, not by hiding this file.
-export const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDFDaInm-U01o91HMUR46luCmRKb16HAV4",
+  authDomain: "project-management-offic-a2dfb.firebaseapp.com",
+  projectId: "project-management-offic-a2dfb",
+  storageBucket: "project-management-offic-a2dfb.firebasestorage.app",
+  messagingSenderId: "243852710497",
+  appId: "1:243852710497:web:880cee2d9749c940599020",
+  measurementId: "G-1LJT9TTZYE"
 };
 
-export const isConfigured = !Object.values(firebaseConfig).some(v => String(v).includes("PASTE_"));
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
