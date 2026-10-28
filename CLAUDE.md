@@ -13,7 +13,7 @@ The published pages can be opened by anyone with the link. Commit page code, for
 - `assets/intake/intake-model.js` — the intake form definition. Adding a field or project type is an edit here only; the form, readiness meter and summary build from it. Field ids must stay stable once intakes exist, since stored data is keyed by them.
 - `assets/intake/intake-page.js` — form rendering, queue, permissions in the UI. Boot code is at the bottom of the file on purpose (helpers are `const`s defined above it).
 - `assets/js/app.js` — Firebase auth, members, intakes. `firebase-config.js` holds the web app config.
-- `firestore.rules` — roles: `admin`, `pm`, `submitter`. UI permission checks mirror these; the rules are what enforce them.
+- `firestore.rules` — roles: `admin`, `pm`, `submitter`. UI permission checks mirror these; the rules are what enforce them. Pushing a change to `main` deploys it via `.github/workflows/deploy-firestore-rules.yml` (service account in the `FIREBASE_SERVICE_ACCOUNT` secret, rules-only permissions). Don't paste rules into the console by hand; the next deploy would overwrite them.
 
 Firestore: `members/{lowercase email}` `{name, role}`; `intakes/{id}` `{type, status, core{}, details{}, submittedBy, submittedByName, submittedAt (ISO), updatedAt, updatedBy}`.
 

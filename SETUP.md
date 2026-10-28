@@ -50,6 +50,12 @@ The first admin has to be added by hand, because the rules only let an admin add
 
 Open the site's **Team** page and sign in. Add everyone else there.
 
+## Automatic rules deploys
+
+After the first manual publish, changes to `firestore.rules` on `main` deploy themselves through the **Deploy Firestore rules** GitHub Action. It signs in with a service account stored in the repository secret `FIREBASE_SERVICE_ACCOUNT`.
+
+To create that account: Google Cloud console for the Firebase project → **IAM & Admin → Service accounts → Create service account**. Grant **Firebase Rules Admin** and **Service Usage Consumer** only, then **Keys → Add key → JSON**. Paste the whole file into the secret and delete the downloaded copy. To run a deploy by hand: **Actions → Deploy Firestore rules → Run workflow**.
+
 ## Roles
 
 | Role | Can do |
